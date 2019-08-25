@@ -9,6 +9,10 @@ import scrapy
 
 
 class DoubanBookItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    img = scrapy.Field()
+    href = scrapy.Field()
+    title = scrapy.Field()
+    about = scrapy.Field()
+    rate = scrapy.Field()
+    rate_count = scrapy.Field()
+    desc = scrapy.Field()

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
 
+from douban_book.items import DoubanBookItem
+
 tags = ["小说", "历史", "日本", "外国文学", "文学", "中国", "心理学", "漫画", "哲学", "随笔", "中国文学", "经典",
         "推理", "爱情", "美国", "日本文学", "绘本", "传记", "社会学", "文化", "散文", "青春", "成长", "科普", "英国",
         "东野圭吾", "生活", "科幻", "悬疑", "旅行", "艺术", "言情", "思维", "社会", "心理", "经济学", "管理", "村上春树",
@@ -30,7 +32,8 @@ class DoubanBookListSpider(scrapy.Spider):
             rate = li.xpath('div[2]/div[2]/span[2]').css('::text').get()
             rate_count = li.xpath('div[2]/div[2]/span[3]').css('::text').get().strip()
             desc = li.xpath('div[2]/p').css('::text').get()
-            yield {
+
+            body = {
                 'img': img,
                 'href': href,
                 'title': title,
@@ -39,6 +42,10 @@ class DoubanBookListSpider(scrapy.Spider):
                 'rate_count': rate_count,
                 'desc': desc,
             }
+            item = DoubanBookItem()
+            for k, v in body.items():
+                item[k] = v
+            yield item
 
         next = response.xpath('//span[@class="next"]/a').attrib.get('href', '')
         if next:
