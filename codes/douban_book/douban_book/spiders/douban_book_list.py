@@ -3,6 +3,8 @@ import scrapy
 
 from douban_book.items import DoubanBookItem
 
+# 下面这些 tag 是第一课爬取到的，用 tag 来拼接到最原始的 URL
+
 tags = ["小说", "历史", "日本", "外国文学", "文学", "中国", "心理学", "漫画", "哲学", "随笔", "中国文学", "经典",
         "推理", "爱情", "美国", "日本文学", "绘本", "传记", "社会学", "文化", "散文", "青春", "成长", "科普", "英国",
         "东野圭吾", "生活", "科幻", "悬疑", "旅行", "艺术", "言情", "思维", "社会", "心理", "经济学", "管理", "村上春树",
@@ -22,8 +24,13 @@ class DoubanBookListSpider(scrapy.Spider):
     start_urls = start_urls
 
     def parse(self, response):
+        # xpath 教程：https://www.runoob.com/xpath/xpath-tutorial.html
+        # 下面这句话拿到了一个网页的书籍的列表
         lis = response.xpath('//ul[@class="subject-list"]/li')
+
+        # 遍历每本书
         for li in lis:
+            # 解析各个书籍
             img = li.xpath('div[1]/a/img').attrib.get('src', '')
             info_attr = li.xpath('div[2]/h2/a').attrib
             href = info_attr.get('href', '')
@@ -42,12 +49,18 @@ class DoubanBookListSpider(scrapy.Spider):
                 'rate_count': rate_count,
                 'desc': desc,
             }
+
+            # Scrapy 中的 Item，参考：https://scrapy-cookbook.readthedocs.io/zh_CN/latest/scrapy-05.html#item
             item = DoubanBookItem()
             for k, v in body.items():
                 item[k] = v
+            # 返回这个 item
             yield item
 
+        # 每个 tag 对应的好很多页，这里解析下一页的地址
         next = response.xpath('//span[@class="next"]/a').attrib.get('href', '')
         if next:
             next = f'https://book.douban.com{next}'
+
+            # 然后爬下一页
             yield scrapy.Request(next, callback=self.parse)
